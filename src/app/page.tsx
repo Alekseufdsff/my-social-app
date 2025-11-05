@@ -23,7 +23,7 @@
           fontSize: '28px',
           fontWeight: 'bold'
         }}>
-          SocialApp
+          Quantum
         </h1>
         <nav style={{ display: 'flex', gap: '15px' }}>
           <button style={{
@@ -61,7 +61,7 @@
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent'
         }}>
-          Добро пожаловать в SocialApp
+          Добро пожаловать в Quantum
         </h2>
         
         <p style={{
