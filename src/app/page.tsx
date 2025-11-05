@@ -1,16 +1,44 @@
 ﻿'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-// Компоненты форм (можно вынести в отдельные файлы позже)
-function LoginForm({ onClose }: { onClose: () => void }) {
+// Компоненты форм
+function LoginForm({ onClose, onLogin }: { onClose: () => void, onLogin: (user: any) => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Реализовать логику входа
-    console.log('Вход:', { email, password })
-    alert('Функция входа в разработке!')
+    setLoading(true)
+    
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          login: email,
+          password: password
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        onLogin(data.user)
+        onClose()
+        alert('Вход выполнен успешно!')
+      } else {
+        alert(data.error)
+      }
+    } catch (error) {
+      alert('Ошибка соединения с сервером')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -39,8 +67,8 @@ function LoginForm({ onClose }: { onClose: () => void }) {
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
             <input
-              type="email"
-              placeholder="Email"
+              type="text"
+              placeholder="Email, имя пользователя или телефон"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={{
@@ -77,24 +105,27 @@ function LoginForm({ onClose }: { onClose: () => void }) {
 
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: '100%',
               padding: '12px',
-              background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+              background: loading ? '#666' : 'linear-gradient(45deg, #8b5cf6, #ec4899)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               fontSize: '16px',
-              cursor: 'pointer',
-              marginBottom: '15px'
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginBottom: '15px',
+              opacity: loading ? 0.7 : 1
             }}
           >
-            Войти
+            {loading ? 'Вход...' : 'Войти'}
           </button>
         </form>
 
         <button
           onClick={onClose}
+          disabled={loading}
           style={{
             width: '100%',
             padding: '10px',
@@ -102,7 +133,7 @@ function LoginForm({ onClose }: { onClose: () => void }) {
             color: '#999',
             border: '1px solid #444',
             borderRadius: '8px',
-            cursor: 'pointer'
+            cursor: loading ? 'not-allowed' : 'pointer'
           }}
         >
           Закрыть
@@ -112,16 +143,45 @@ function LoginForm({ onClose }: { onClose: () => void }) {
   )
 }
 
-function RegisterForm({ onClose }: { onClose: () => void }) {
+function RegisterForm({ onClose, onSwitchToLogin }: { onClose: () => void, onSwitchToLogin: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
+  const [phone, setPhone] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Реализовать логику регистрации
-    console.log('Регистрация:', { username, email, password })
-    alert('Функция регистрации в разработке!')
+    setLoading(true)
+    
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          email: email,
+          phone: phone,
+          password: password
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert('Регистрация успешна! Теперь войдите в систему.')
+        onClose()
+        onSwitchToLogin()
+      } else {
+        alert(data.error)
+      }
+    } catch (error) {
+      alert('Ошибка соединения с сервером')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -185,11 +245,30 @@ function RegisterForm({ onClose }: { onClose: () => void }) {
               required
             />
           </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <input
+              type="tel"
+              placeholder="Номер телефона"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid #444',
+                borderRadius: '8px',
+                color: 'white',
+                fontSize: '16px'
+              }}
+              required
+            />
+          </div>
           
           <div style={{ marginBottom: '30px' }}>
             <input
               type="password"
-              placeholder="Пароль"
+              placeholder="Пароль (минимум 6 символов)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{
@@ -207,24 +286,42 @@ function RegisterForm({ onClose }: { onClose: () => void }) {
 
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: '100%',
               padding: '12px',
-              background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+              background: loading ? '#666' : 'linear-gradient(45deg, #8b5cf6, #ec4899)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               fontSize: '16px',
-              cursor: 'pointer',
-              marginBottom: '15px'
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginBottom: '15px',
+              opacity: loading ? 0.7 : 1
             }}
           >
-            Зарегистрироваться
+            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
         </form>
 
+        <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+          <button
+            onClick={onSwitchToLogin}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#8b5cf6',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Уже есть аккаунт? Войти
+          </button>
+        </div>
+
         <button
           onClick={onClose}
+          disabled={loading}
           style={{
             width: '100%',
             padding: '10px',
@@ -232,7 +329,7 @@ function RegisterForm({ onClose }: { onClose: () => void }) {
             color: '#999',
             border: '1px solid #444',
             borderRadius: '8px',
-            cursor: 'pointer'
+            cursor: loading ? 'not-allowed' : 'pointer'
           }}
         >
           Закрыть
@@ -246,7 +343,34 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<any>(null)
+
+  // Проверяем авторизацию при загрузке
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    if (token && userData) {
+      setIsLoggedIn(true)
+      setUser(JSON.parse(userData))
+    }
+  }, [])
+
+  const handleLogin = (userData: any) => {
+    setIsLoggedIn(true)
+    setUser(userData)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setIsLoggedIn(false)
+    setUser(null)
+  }
+
+  const switchToLogin = () => {
+    setShowRegister(false)
+    setShowLogin(true)
+  }
 
   return (
     <div style={{
@@ -278,9 +402,9 @@ export default function Home() {
         <nav style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           {isLoggedIn ? (
             <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-              <span>Привет, пользователь!</span>
+              <span>Привет, {user?.username}!</span>
               <button 
-                onClick={() => setIsLoggedIn(false)}
+                onClick={handleLogout}
                 style={{
                   padding: '8px 16px',
                   background: 'rgba(255,255,255,0.1)',
@@ -355,15 +479,28 @@ export default function Home() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
             }}>
-              Добро пожаловать в Quantum!
+              Добро пожаловать, {user?.username}!
             </h2>
             <p style={{
               fontSize: '1.3rem',
               color: '#ccc',
               marginBottom: '50px'
             }}>
-              Рады видеть вас в нашем сообществе!
+              Рады видеть вас в Quantum!
             </p>
+            <div style={{
+              background: 'rgba(255,255,255,0.05)',
+              padding: '30px',
+              borderRadius: '15px',
+              maxWidth: '500px',
+              margin: '0 auto',
+              border: '1px solid #333'
+            }}>
+              <h3 style={{ marginBottom: '20px' }}>Ваш профиль</h3>
+              <p><strong>Имя:</strong> {user?.username}</p>
+              <p><strong>Email:</strong> {user?.email}</p>
+              <p><strong>Телефон:</strong> {user?.phone}</p>
+            </div>
           </div>
         ) : (
           // Контент для неавторизованных пользователей
@@ -493,8 +630,8 @@ export default function Home() {
       </main>
 
       {/* Модальные окна */}
-      {showLogin && <LoginForm onClose={() => setShowLogin(false)} />}
-      {showRegister && <RegisterForm onClose={() => setShowRegister(false)} />}
+      {showLogin && <LoginForm onClose={() => setShowLogin(false)} onLogin={handleLogin} />}
+      {showRegister && <RegisterForm onClose={() => setShowRegister(false)} onSwitchToLogin={switchToLogin} />}
     </div>
   )
 }
