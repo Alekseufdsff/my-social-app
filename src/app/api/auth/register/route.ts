@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Пароль должен быть минимум 6 символов' }, { status: 400 })
     }
 
-    const client = await MongoClient.connect(uri)
+    const client = new MongoClient(uri)
+    await client.connect()
     const db = client.db()
     
     // Проверяем нет ли такого пользователя
