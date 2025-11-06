@@ -1,6 +1,5 @@
 ﻿'use client'
 import { useState, useEffect, useRef } from 'react'
-import { io, Socket } from 'socket.io-client'
 
 // Компоненты форм
 function LoginForm({ onClose }: { onClose: () => void }) {
@@ -105,84 +104,24 @@ function RegisterForm({ onClose }: { onClose: () => void }) {
   )
 }
 
-// Интерфейс чата
-function ChatInterface() {
-  const [messages, setMessages] = useState<{text: string, user: string, time: string, userId: string}[]>([])
+// ПРОСТОЙ РАБОЧИЙ ЧАТ
+function SimpleChat() {
+  const [messages, setMessages] = useState<{text: string, user: string, time: string}[]>([])
   const [newMessage, setNewMessage] = useState('')
-  const [friends, setFriends] = useState<{id: string, name: string, online: boolean}[]>([])
-  const [activeChat, setActiveChat] = useState<string | null>(null)
-  const socketRef = useRef<Socket | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  // Текущий пользователь
-  const currentUser = { id: 'user1', name: 'Вы' }
-
-  useEffect(() => {
-    socketRef.current = io()
-
-    // ПУСТОЙ список друзей - никаких ботов!
-    setFriends([])
-
-    // Получаем сообщения
-    socketRef.current.on('receive-message', (data) => {
-      if (data.chatId === activeChat) {
-        setMessages(prev => [...prev, {
-          text: data.text,
-          user: data.userName,
-          userId: data.userId,
-          time: new Date().toLocaleTimeString()
-        }])
-      }
-    })
-
-    // Слушаем новых пользователей онлайн
-    socketRef.current.on('user-online', (userData) => {
-      setFriends(prev => {
-        const exists = prev.find(f => f.id === userData.id)
-        if (!exists) {
-          return [...prev, { id: userData.id, name: userData.name, online: true }]
-        }
-        return prev
-      })
-    })
-
-    // Слушаем отключения пользователей
-    socketRef.current.on('user-offline', (userId) => {
-      setFriends(prev => prev.map(f => 
-        f.id === userId ? { ...f, online: false } : f
-      ))
-    })
-
-    return () => {
-      socketRef.current?.disconnect()
-    }
-  }, [activeChat])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   const sendMessage = () => {
-    if (newMessage.trim() && socketRef.current && activeChat) {
-      const messageData = {
-        text: newMessage,
-        user: currentUser.name,
-        userId: currentUser.id,
-        userName: currentUser.name,
-        chatId: activeChat,
-        time: new Date().toLocaleTimeString()
-      }
-      
-      // Отправляем через Socket.io
-      socketRef.current.emit('send-message', messageData)
-      
-      // Локально добавляем сообщение
-      setMessages(prev => [...prev, {
+    if (newMessage.trim()) {
+      const newMsg = {
         text: newMessage,
         user: 'Вы',
-        userId: currentUser.id,
         time: new Date().toLocaleTimeString()
-      }])
+      }
+      setMessages(prev => [...prev, newMsg])
       setNewMessage('')
     }
   }
@@ -191,24 +130,6 @@ function ChatInterface() {
     if (e.key === 'Enter') {
       sendMessage()
     }
-  }
-
-  const startChatWithNewUser = () => {
-    const newUserId = `user${Date.now()}`
-    const newUserName = `User${Math.floor(Math.random() * 1000)}`
-    
-    setFriends(prev => [...prev, { 
-      id: newUserId, 
-      name: newUserName, 
-      online: true 
-    }])
-    setActiveChat(newUserId)
-    
-    // Уведомляем других о новом пользователе
-    socketRef.current?.emit('user-joined', {
-      id: newUserId,
-      name: newUserName
-    })
   }
 
   return (
@@ -226,44 +147,18 @@ function ChatInterface() {
         padding: '15px 20px',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
         background: 'rgba(0,0,0,0.3)',
-        borderRadius: '15px 15px 0 0',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
+        borderRadius: '15px 15px 0 0'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {activeChat && (
-            <>
-              <div style={{
-                width: '10px',
-                height: '10px',
-                background: '#10b981',
-                borderRadius: '50%'
-              }}></div>
-              <span style={{ fontWeight: 'bold' }}>
-                {friends.find(f => f.id === activeChat)?.name || 'Чат'}
-              </span>
-              <span style={{ color: '#999', fontSize: '14px' }}>online</span>
-            </>
-          )}
+          <div style={{
+            width: '10px',
+            height: '10px',
+            background: '#10b981',
+            borderRadius: '50%'
+          }}></div>
+          <span style={{ fontWeight: 'bold' }}>Общий чат</span>
+          <span style={{ color: '#999', fontSize: '14px' }}>online</span>
         </div>
-        
-        {!activeChat && (
-          <button
-            onClick={startChatWithNewUser}
-            style={{
-              padding: '8px 16px',
-              background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            + Начать новый чат
-          </button>
-        )}
       </div>
 
       {/* Сообщения */}
@@ -273,89 +168,79 @@ function ChatInterface() {
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: '15px',
-        background: activeChat ? 'transparent' : 'rgba(0,0,0,0.2)',
-        alignItems: activeChat ? 'stretch' : 'center',
-        justifyContent: activeChat ? 'flex-start' : 'center'
+        gap: '15px'
       }}>
-        {!activeChat ? (
-          <div style={{ textAlign: 'center', color: '#999' }}>
+        {messages.length === 0 ? (
+          <div style={{ textAlign: 'center', color: '#999', marginTop: '50px' }}>
             <div style={{ fontSize: '48px', marginBottom: '20px' }}>💬</div>
-            <h3>Выберите чат чтобы начать общение</h3>
-            <p>Или создайте новый чат</p>
+            <h3>Чат пуст</h3>
+            <p>Напишите первое сообщение!</p>
           </div>
         ) : (
-          <>
-            {messages.filter(msg => {
-              const friend = friends.find(f => f.id === activeChat)
-              return msg.userId === currentUser.id || msg.userId === activeChat || msg.user === friend?.name
-            }).map((msg, index) => (
-              <div key={index} style={{
-                alignSelf: msg.userId === currentUser.id ? 'flex-end' : 'flex-start',
-                background: msg.userId === currentUser.id 
-                  ? 'linear-gradient(45deg, #8b5cf6, #ec4899)' 
-                  : 'rgba(255,255,255,0.1)',
-                padding: '10px 15px',
-                borderRadius: '15px',
-                maxWidth: '70%',
-                border: msg.userId === currentUser.id ? 'none' : '1px solid rgba(255,255,255,0.2)'
-              }}>
-                <div style={{ fontSize: '14px', opacity: 0.8, marginBottom: '5px' }}>
-                  {msg.user} • {msg.time}
-                </div>
-                <div>{msg.text}</div>
+          messages.map((msg, index) => (
+            <div key={index} style={{
+              alignSelf: msg.user === 'Вы' ? 'flex-end' : 'flex-start',
+              background: msg.user === 'Вы' 
+                ? 'linear-gradient(45deg, #8b5cf6, #ec4899)' 
+                : 'rgba(255,255,255,0.1)',
+              padding: '10px 15px',
+              borderRadius: '15px',
+              maxWidth: '70%',
+              border: msg.user === 'Вы' ? 'none' : '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <div style={{ fontSize: '14px', opacity: 0.8, marginBottom: '5px' }}>
+                {msg.user} • {msg.time}
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </>
+              <div>{msg.text}</div>
+            </div>
+          ))
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Ввод сообщения */}
-      {activeChat && (
-        <div style={{
-          padding: '15px 20px',
-          borderTop: '1px solid rgba(255,255,255,0.1)',
-          background: 'rgba(0,0,0,0.3)',
-          borderRadius: '0 0 15px 15px'
-        }}>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Напишите сообщение..."
-              style={{
-                flex: 1,
-                padding: '12px 15px',
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '25px',
-                color: 'white',
-                fontSize: '14px'
-              }}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={!newMessage.trim()}
-              style={{
-                padding: '12px 25px',
-                background: newMessage.trim() 
-                  ? 'linear-gradient(45deg, #8b5cf6, #ec4899)' 
-                  : 'rgba(255,255,255,0.1)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '25px',
-                cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-                fontWeight: 'bold'
-              }}
-            >
-              Отправить
-            </button>
-          </div>
+      <div style={{
+        padding: '15px 20px',
+        borderTop: '1px solid rgba(255,255,255,0.1)',
+        background: 'rgba(0,0,0,0.3)',
+        borderRadius: '0 0 15px 15px'
+      }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Напишите сообщение..."
+            style={{
+              flex: 1,
+              padding: '12px 15px',
+              background: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '25px',
+              color: 'white',
+              fontSize: '14px'
+            }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!newMessage.trim()}
+            style={{
+              padding: '12px 25px',
+              background: newMessage.trim() 
+                ? 'linear-gradient(45deg, #8b5cf6, #ec4899)' 
+                : 'rgba(255,255,255,0.1)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '25px',
+              cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
+              fontWeight: 'bold'
+            }}
+          >
+            Отправить
+          </button>
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -389,13 +274,13 @@ export default function Home() {
           fontSize: '28px',
           fontWeight: 'bold'
         }}>
-          Quantum
+          Quantum Chat
         </h1>
         
         <nav style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           {isLoggedIn ? (
             <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-              <span>Привет, пользователь!</span>
+              <span>Добро пожаловать!</span>
               <button 
                 onClick={() => setIsLoggedIn(false)}
                 style={{
@@ -446,84 +331,74 @@ export default function Home() {
       {/* Основной контент */}
       <main style={{
         padding: '40px 20px',
-        maxWidth: '1200px',
+        maxWidth: '800px',
         margin: '0 auto'
       }}>
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: '300px 1fr',
-          gap: '20px',
-          height: 'calc(100vh - 140px)'
+          background: 'rgba(255,255,255,0.05)',
+          borderRadius: '15px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          padding: '30px',
+          marginBottom: '30px'
         }}>
-          {/* Боковая панель с друзьями */}
+          <h2 style={{
+            textAlign: 'center',
+            marginBottom: '20px',
+            background: 'linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Добро пожаловать в Quantum Chat!
+          </h2>
+          <p style={{ textAlign: 'center', color: '#ccc', marginBottom: '0' }}>
+            Самый современный чат с темной темой и крутыми анимациями
+          </p>
+        </div>
+
+        {/* Чат */}
+        <SimpleChat />
+
+        {/* Фичи */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '20px',
+          marginTop: '40px'
+        }}>
           <div style={{
             background: 'rgba(255,255,255,0.05)',
+            padding: '25px',
             borderRadius: '15px',
             border: '1px solid rgba(255,255,255,0.1)',
-            padding: '20px',
-            overflowY: 'auto'
+            textAlign: 'center'
           }}>
-            <h3 style={{ marginBottom: '20px', color: '#8b5cf6' }}>Чаты</h3>
-            
-            {/* Кнопка нового чата */}
-            <button
-              onClick={() => {
-                const newUserId = `user${Date.now()}`
-                const newUserName = `User${Math.floor(Math.random() * 1000)}`
-                
-                // В реальном приложении здесь будет поиск пользователей
-                // Сейчас создаем тестового пользователя
-                const friendsList = document.querySelector('.friends-list') as HTMLElement
-                if (friendsList) {
-                  friendsList.innerHTML += `
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; 
-                         background: rgba(139, 92, 246, 0.2); border-radius: 10px; cursor: pointer; margin-bottom: 10px;">
-                      <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
-                      <span>${newUserName}</span>
-                      <span style="color: #999; font-size: 12px; margin-left: auto;">online</span>
-                    </div>
-                  `
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '12px',
-                background: 'rgba(139, 92, 246, 0.2)',
-                color: 'white',
-                border: '1px solid #8b5cf6',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                marginBottom: '20px',
-                fontWeight: 'bold'
-              }}
-            >
-              + Найти пользователей
-            </button>
-            
-            {/* Список чатов будет заполняться динамически */}
-            <div className="friends-list">
-              {/* Чаты будут добавляться здесь через JavaScript */}
-            </div>
-            
-            <div style={{ 
-              marginTop: '20px', 
-              padding: '15px', 
-              background: 'rgba(0,0,0,0.3)', 
-              borderRadius: '10px',
-              textAlign: 'center',
-              color: '#999',
-              fontSize: '14px'
-            }}>
-              💡 Откройте вкладку в другом браузере чтобы тестировать чат между пользователями
-            </div>
+            <div style={{ fontSize: '40px', marginBottom: '15px' }}>💬</div>
+            <h3 style={{ marginBottom: '10px' }}>Мгновенные сообщения</h3>
+            <p style={{ color: '#999' }}>Общайтесь в реальном времени</p>
           </div>
-
-          {/* Основной чат */}
+          
           <div style={{
-            display: 'flex',
-            flexDirection: 'column'
+            background: 'rgba(255,255,255,0.05)',
+            padding: '25px',
+            borderRadius: '15px',
+            border: '1px solid rgba(255,255,255,0.1)',
+            textAlign: 'center'
           }}>
-            <ChatInterface />
+            <div style={{ fontSize: '40px', marginBottom: '15px' }}>🎨</div>
+            <h3 style={{ marginBottom: '10px' }}>Красивый дизайн</h3>
+            <p style={{ color: '#999' }}>Темная тема с анимациями</p>
+          </div>
+          
+          <div style={{
+            background: 'rgba(255,255,255,0.05)',
+            padding: '25px',
+            borderRadius: '15px',
+            border: '1px solid rgba(255,255,255,0.1)',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '40px', marginBottom: '15px' }}>⚡</div>
+            <h3 style={{ marginBottom: '10px' }}>Быстрая работа</h3>
+            <p style={{ color: '#999' }}>Оптимизированная производительность</p>
           </div>
         </div>
       </main>
