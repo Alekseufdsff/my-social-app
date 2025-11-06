@@ -2,41 +2,23 @@ import { Server } from 'socket.io'
 
 export default function SocketHandler(req, res) {
   if (res.socket.server.io) {
-    console.log('Socket is already running')
+    console.log('Socket уже запущен!')
   } else {
-    console.log('Socket is initializing')
+    console.log('Запускаем Socket сервер...')
     const io = new Server(res.socket.server)
     res.socket.server.io = io
 
     io.on('connection', (socket) => {
-      console.log('User connected:', socket.id)
+      console.log('Пользователь подключился:', socket.id)
       
-      // Присоединение к комнате пользователя
-      socket.on('join_user', (userId) => {
-        socket.join(userId)
-        console.log(`User ${userId} joined room`)
-      })
-
-      // Отправка сообщения
-      socket.on('send_message', (data) => {
-        const { to, message, from } = data
-        socket.to(to).emit('receive_message', {
-          from,
-          message,
-          timestamp: new Date()
-        })
-      })
-
-      // Онлайн статус
-      socket.on('user_online', (userId) => {
-        socket.broadcast.emit('user_status', {
-          userId,
-          online: true
-        })
+      // Принимаем сообщения
+      socket.on('send-message', (data) => {
+        // Отправляем всем пользователям
+        io.emit('receive-message', data)
       })
 
       socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id)
+        console.log('Пользователь отключился:', socket.id)
       })
     })
   }
