@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const user = await db.collection('users').findOne({
       $or: [
         { email: login },
-        { username: login }, 
+        { username: login },
         { phone: login }
       ]
     })
@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
 
     // Проверяем пароль
     const isPasswordValid = await bcrypt.compare(password, user.password)
-    
     if (!isPasswordValid) {
       await client.close()
       return NextResponse.json({ error: 'Неверный пароль' }, { status: 400 })
@@ -46,8 +45,8 @@ export async function POST(request: NextRequest) {
         userId: user._id,
         username: user.username,
         email: user.email 
-      },
-      JWT_SECRET,
+      }, 
+      JWT_SECRET, 
       { expiresIn: '7d' }
     )
 
