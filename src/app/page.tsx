@@ -1,50 +1,24 @@
 ﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 
-// Компоненты форм
 function LoginForm({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     console.log('Вход:', { email, password })
     alert('Функция входа в разработке!')
   }
-
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', 
-      justifyContent: 'center', zIndex: 1000
-    }}>
-      <div style={{
-        background: 'linear-gradient(135deg, #1a1a2e, #16213e)', padding: '40px',
-        borderRadius: '20px', border: '1px solid #333', minWidth: '400px', color: 'white'
-      }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Вход в Quantum</h2>
+    <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000}}>
+      <div style={{background: 'linear-gradient(135deg, #1a1a2e, #16213e)', padding: '40px', borderRadius: '20px', border: '1px solid #333', minWidth: '400px', color: 'white'}}>
+        <h2 style={{textAlign: 'center', marginBottom: '30px'}}>Вход в Quantum</h2>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', 
-              border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px' }} required />
-          </div>
-          <div style={{ marginBottom: '30px' }}>
-            <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)}
-              style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', 
-              border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px' }} required />
-          </div>
-          <button type="submit" style={{ width: '100%', padding: '12px', 
-            background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', color: 'white', 
-            border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '15px' }}>
-            Войти
-          </button>
+          <div style={{marginBottom: '20px'}}><input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px'}} required /></div>
+          <div style={{marginBottom: '30px'}}><input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} style={{width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px'}} required /></div>
+          <button type="submit" style={{width: '100%', padding: '12px', background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '15px'}}>Войти</button>
         </form>
-        <button onClick={onClose} style={{ width: '100%', padding: '10px', 
-          background: 'transparent', color: '#999', border: '1px solid #444', 
-          borderRadius: '8px', cursor: 'pointer' }}>
-          Закрыть
-        </button>
+        <button onClick={onClose} style={{width: '100%', padding: '10px', background: 'transparent', color: '#999', border: '1px solid #444', borderRadius: '8px', cursor: 'pointer'}}>Закрыть</button>
       </div>
     </div>
   )
@@ -54,191 +28,61 @@ function RegisterForm({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     console.log('Регистрация:', { username, email, password })
     alert('Функция регистрации в разработке!')
   }
-
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', 
-      justifyContent: 'center', zIndex: 1000
-    }}>
-      <div style={{
-        background: 'linear-gradient(135deg, #1a1a2e, #16213e)', padding: '40px',
-        borderRadius: '20px', border: '1px solid #333', minWidth: '400px', color: 'white'
-      }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Регистрация в Quantum</h2>
+    <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000}}>
+      <div style={{background: 'linear-gradient(135deg, #1a1a2e, #16213e)', padding: '40px', borderRadius: '20px', border: '1px solid #333', minWidth: '400px', color: 'white'}}>
+        <h2 style={{textAlign: 'center', marginBottom: '30px'}}>Регистрация в Quantum</h2>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <input type="text" placeholder="Имя пользователя" value={username} onChange={(e) => setUsername(e.target.value)}
-              style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', 
-              border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px' }} required />
-          </div>
-          <div style={{ marginBottom: '20px' }}>
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', 
-              border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px' }} required />
-          </div>
-          <div style={{ marginBottom: '30px' }}>
-            <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)}
-              style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', 
-              border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px' }} required />
-          </div>
-          <button type="submit" style={{ width: '100%', padding: '12px', 
-            background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', color: 'white', 
-            border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '15px' }}>
-            Зарегистрироваться
-          </button>
+          <div style={{marginBottom: '20px'}}><input type="text" placeholder="Имя пользователя" value={username} onChange={(e) => setUsername(e.target.value)} style={{width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px'}} required /></div>
+          <div style={{marginBottom: '20px'}}><input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px'}} required /></div>
+          <div style={{marginBottom: '30px'}}><input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} style={{width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', border: '1px solid #444', borderRadius: '8px', color: 'white', fontSize: '16px'}} required /></div>
+          <button type="submit" style={{width: '100%', padding: '12px', background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '15px'}}>Зарегистрироваться</button>
         </form>
-        <button onClick={onClose} style={{ width: '100%', padding: '10px', 
-          background: 'transparent', color: '#999', border: '1px solid #444', 
-          borderRadius: '8px', cursor: 'pointer' }}>
-          Закрыть
-        </button>
+        <button onClick={onClose} style={{width: '100%', padding: '10px', background: 'transparent', color: '#999', border: '1px solid #444', borderRadius: '8px', cursor: 'pointer'}}>Закрыть</button>
       </div>
     </div>
   )
 }
 
-// ПРОСТОЙ РАБОЧИЙ ЧАТ
-function SimpleChat() {
+function ChatInterface() {
   const [messages, setMessages] = useState<{text: string, user: string, time: string}[]>([])
   const [newMessage, setNewMessage] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
   const sendMessage = () => {
     if (newMessage.trim()) {
-      const newMsg = {
-        text: newMessage,
-        user: 'Вы',
-        time: new Date().toLocaleTimeString()
-      }
-      setMessages(prev => [...prev, newMsg])
+      setMessages(prev => [...prev, {text: newMessage, user: 'Вы', time: new Date().toLocaleTimeString()}])
       setNewMessage('')
     }
   }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      sendMessage()
-    }
-  }
-
+  const handleKeyPress = (e: React.KeyboardEvent) => { if (e.key === 'Enter') sendMessage() }
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.05)',
-      borderRadius: '15px',
-      border: '1px solid rgba(255,255,255,0.1)',
-      height: '500px',
-      display: 'flex',
-      flexDirection: 'column',
-      margin: '20px 0'
-    }}>
-      {/* Заголовок чата */}
-      <div style={{
-        padding: '15px 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-        background: 'rgba(0,0,0,0.3)',
-        borderRadius: '15px 15px 0 0'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '10px',
-            height: '10px',
-            background: '#10b981',
-            borderRadius: '50%'
-          }}></div>
-          <span style={{ fontWeight: 'bold' }}>Общий чат</span>
-          <span style={{ color: '#999', fontSize: '14px' }}>online</span>
+    <div style={{background: 'rgba(255,255,255,0.05)', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)', height: '500px', display: 'flex', flexDirection: 'column', margin: '20px 0'}}>
+      <div style={{padding: '15px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', borderRadius: '15px 15px 0 0'}}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+          <div style={{width: '10px', height: '10px', background: '#10b981', borderRadius: '50%'}}></div>
+          <span style={{fontWeight: 'bold'}}>Aleksey</span>
+          <span style={{color: '#999', fontSize: '14px'}}>online</span>
         </div>
       </div>
-
-      {/* Сообщения */}
-      <div style={{
-        flex: 1,
-        padding: '20px',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px'
-      }}>
-        {messages.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#999', marginTop: '50px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '20px' }}>💬</div>
-            <h3>Чат пуст</h3>
-            <p>Напишите первое сообщение!</p>
+      <div style={{flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '15px'}}>
+        {messages.map((msg, index) => (
+          <div key={index} style={{alignSelf: msg.user === 'Вы' ? 'flex-end' : 'flex-start', background: msg.user === 'Вы' ? 'linear-gradient(45deg, #8b5cf6, #ec4899)' : 'rgba(255,255,255,0.1)', padding: '10px 15px', borderRadius: '15px', maxWidth: '70%', border: msg.user === 'Вы' ? 'none' : '1px solid rgba(255,255,255,0.2)'}}>
+            <div style={{fontSize: '14px', opacity: 0.8, marginBottom: '5px'}}>{msg.user} • {msg.time}</div>
+            <div>{msg.text}</div>
           </div>
-        ) : (
-          messages.map((msg, index) => (
-            <div key={index} style={{
-              alignSelf: msg.user === 'Вы' ? 'flex-end' : 'flex-start',
-              background: msg.user === 'Вы' 
-                ? 'linear-gradient(45deg, #8b5cf6, #ec4899)' 
-                : 'rgba(255,255,255,0.1)',
-              padding: '10px 15px',
-              borderRadius: '15px',
-              maxWidth: '70%',
-              border: msg.user === 'Вы' ? 'none' : '1px solid rgba(255,255,255,0.2)'
-            }}>
-              <div style={{ fontSize: '14px', opacity: 0.8, marginBottom: '5px' }}>
-                {msg.user} • {msg.time}
-              </div>
-              <div>{msg.text}</div>
-            </div>
-          ))
-        )}
+        ))}
         <div ref={messagesEndRef} />
       </div>
-
-      {/* Ввод сообщения */}
-      <div style={{
-        padding: '15px 20px',
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        background: 'rgba(0,0,0,0.3)',
-        borderRadius: '0 0 15px 15px'
-      }}>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Напишите сообщение..."
-            style={{
-              flex: 1,
-              padding: '12px 15px',
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '25px',
-              color: 'white',
-              fontSize: '14px'
-            }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!newMessage.trim()}
-            style={{
-              padding: '12px 25px',
-              background: newMessage.trim() 
-                ? 'linear-gradient(45deg, #8b5cf6, #ec4899)' 
-                : 'rgba(255,255,255,0.1)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '25px',
-              cursor: newMessage.trim() ? 'pointer' : 'not-allowed',
-              fontWeight: 'bold'
-            }}
-          >
-            Отправить
-          </button>
+      <div style={{padding: '15px 20px', borderTop: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)', borderRadius: '0 0 15px 15px'}}>
+        <div style={{display: 'flex', gap: '10px'}}>
+          <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyPress={handleKeyPress} placeholder="Напишите сообщение..." style={{flex: 1, padding: '12px 15px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '25px', color: 'white', fontSize: '14px'}} />
+          <button onClick={sendMessage} style={{padding: '12px 25px', background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', color: 'white', border: 'none', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold'}}>Отправить</button>
         </div>
       </div>
     </div>
@@ -249,161 +93,44 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(true)
-
   return (
-    <div style={{
-      background: 'linear-gradient(135deg, #000000, #1a1a2e, #000000)',
-      minHeight: '100vh',
-      color: 'white',
-      fontFamily: 'Arial'
-    }}>
-      {/* Хедер */}
-      <header style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '20px 50px',
-        borderBottom: '1px solid #333',
-        background: 'rgba(0,0,0,0.3)',
-        backdropFilter: 'blur(10px)'
-      }}>
-        <h1 style={{
-          background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          fontSize: '28px',
-          fontWeight: 'bold'
-        }}>
-          Quantum Chat
-        </h1>
-        
-        <nav style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+    <div style={{background: 'linear-gradient(135deg, #000000, #1a1a2e, #000000)', minHeight: '100vh', color: 'white', fontFamily: 'Arial'}}>
+      <header style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', borderBottom: '1px solid #333', background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)'}}>
+        <h1 style={{background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '28px', fontWeight: 'bold'}}>Quantum</h1>
+        <nav style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
           {isLoggedIn ? (
-            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-              <span>Добро пожаловать!</span>
-              <button 
-                onClick={() => setIsLoggedIn(false)}
-                style={{
-                  padding: '8px 16px',
-                  background: 'rgba(255,255,255,0.1)',
-                  color: 'white',
-                  border: '1px solid #444',
-                  borderRadius: '6px',
-                  cursor: 'pointer'
-                }}
-              >
-                Выйти
-              </button>
+            <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
+              <span>Привет, пользователь!</span>
+              <button onClick={() => setIsLoggedIn(false)} style={{padding: '8px 16px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid #444', borderRadius: '6px', cursor: 'pointer'}}>Выйти</button>
             </div>
           ) : (
             <>
-              <button 
-                onClick={() => setShowLogin(true)}
-                style={{
-                  padding: '10px 20px',
-                  background: 'transparent',
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer',
-                  borderRadius: '5px'
-                }}
-              >
-                Вход
-              </button>
-              <button 
-                onClick={() => setShowRegister(true)}
-                style={{
-                  padding: '10px 25px',
-                  background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer'
-                }}
-              >
-                Регистрация
-              </button>
+              <button onClick={() => setShowLogin(true)} style={{padding: '10px 20px', background: 'transparent', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '5px'}}>Вход</button>
+              <button onClick={() => setShowRegister(true)} style={{padding: '10px 25px', background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}>Регистрация</button>
             </>
           )}
         </nav>
       </header>
-
-      {/* Основной контент */}
-      <main style={{
-        padding: '40px 20px',
-        maxWidth: '800px',
-        margin: '0 auto'
-      }}>
-        <div style={{
-          background: 'rgba(255,255,255,0.05)',
-          borderRadius: '15px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          padding: '30px',
-          marginBottom: '30px'
-        }}>
-          <h2 style={{
-            textAlign: 'center',
-            marginBottom: '20px',
-            background: 'linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            Добро пожаловать в Quantum Chat!
-          </h2>
-          <p style={{ textAlign: 'center', color: '#ccc', marginBottom: '0' }}>
-            Самый современный чат с темной темой и крутыми анимациями
-          </p>
-        </div>
-
-        {/* Чат */}
-        <SimpleChat />
-
-        {/* Фичи */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '20px',
-          marginTop: '40px'
-        }}>
-          <div style={{
-            background: 'rgba(255,255,255,0.05)',
-            padding: '25px',
-            borderRadius: '15px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '40px', marginBottom: '15px' }}>💬</div>
-            <h3 style={{ marginBottom: '10px' }}>Мгновенные сообщения</h3>
-            <p style={{ color: '#999' }}>Общайтесь в реальном времени</p>
+      <main style={{padding: '40px 20px', maxWidth: '1200px', margin: '0 auto'}}>
+        <div style={{display: 'grid', gridTemplateColumns: '300px 1fr', gap: '20px', height: 'calc(100vh - 140px)'}}>
+          <div style={{background: 'rgba(255,255,255,0.05)', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.1)', padding: '20px', overflowY: 'auto'}}>
+            <h3 style={{marginBottom: '20px', color: '#8b5cf6'}}>Друзья</h3>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(139, 92, 246, 0.2)', borderRadius: '10px', cursor: 'pointer'}}>
+                <div style={{width: '8px', height: '8px', background: '#10b981', borderRadius: '50%'}}></div>
+                <span>Aleksey</span>
+                <span style={{color: '#999', fontSize: '12px', marginLeft: 'auto'}}>online</span>
+              </div>
+              <div style={{display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', cursor: 'pointer'}}>
+                <div style={{width: '8px', height: '8px', background: '#6b7280', borderRadius: '50%'}}></div>
+                <span>Maria</span>
+                <span style={{color: '#999', fontSize: '12px', marginLeft: 'auto'}}>offline</span>
+              </div>
+            </div>
           </div>
-          
-          <div style={{
-            background: 'rgba(255,255,255,0.05)',
-            padding: '25px',
-            borderRadius: '15px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '40px', marginBottom: '15px' }}>🎨</div>
-            <h3 style={{ marginBottom: '10px' }}>Красивый дизайн</h3>
-            <p style={{ color: '#999' }}>Темная тема с анимациями</p>
-          </div>
-          
-          <div style={{
-            background: 'rgba(255,255,255,0.05)',
-            padding: '25px',
-            borderRadius: '15px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '40px', marginBottom: '15px' }}>⚡</div>
-            <h3 style={{ marginBottom: '10px' }}>Быстрая работа</h3>
-            <p style={{ color: '#999' }}>Оптимизированная производительность</p>
-          </div>
+          <div style={{display: 'flex', flexDirection: 'column'}}><ChatInterface /></div>
         </div>
       </main>
-
-      {/* Модальные окна */}
       {showLogin && <LoginForm onClose={() => setShowLogin(false)} />}
       {showRegister && <RegisterForm onClose={() => setShowRegister(false)} />}
     </div>
