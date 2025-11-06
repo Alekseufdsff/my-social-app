@@ -1,7 +1,7 @@
 ﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 
-export default function TelegramClone() {
+export default function QuantumMessenger() {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [activeChat, setActiveChat] = useState<any>(null)
   const [messages, setMessages] = useState<any[]>([])
@@ -10,16 +10,17 @@ export default function TelegramClone() {
   const [contacts, setContacts] = useState<any[]>([])
   const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
-  const [currentSection, setCurrentSection] = useState('chats') // chats, contacts, settings
+  const [currentSection, setCurrentSection] = useState('chats')
   const [searchQuery, setSearchQuery] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Загрузка при запуске
   useEffect(() => {
-    const savedUser = localStorage.getItem('tg-user')
+    const savedUser = localStorage.getItem('quantum-user')
     if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser))
-      loadData()
+      const user = JSON.parse(savedUser)
+      setCurrentUser(user)
+      loadData(user)
     }
   }, [])
 
@@ -27,106 +28,44 @@ export default function TelegramClone() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const loadData = () => {
-    // Тестовые данные как в ТГ
-    setChats([
+  const loadData = (user: any) => {
+    // Только реальные контакты (без ботов)
+    const userContacts = [
       {
         id: 1,
-        name: 'Aleksey',
-        username: '@aleksey',
-        avatar: '👨',
-        lastMessage: 'Привет! Как дела?',
-        time: '12:30',
-        unread: 2,
-        online: true,
-        verified: true
-      },
-      {
-        id: 2, 
-        name: 'Maria Ivanova',
-        username: '@maria',
-        avatar: '👩',
-        lastMessage: 'Жду тебя завтра в 15:00',
-        time: '11:15',
-        unread: 0,
-        online: false,
-        verified: false
-      },
-      {
-        id: 3,
-        name: 'Tech Chat',
-        username: '@tech',
-        avatar: '💻',
-        lastMessage: 'Новый код уже в продакшене',
-        time: '10:45',
-        unread: 5,
-        online: true,
-        verified: true,
-        isGroup: true
-      },
-      {
-        id: 4,
-        name: 'Support',
-        username: '@support',
-        avatar: '🛟',
-        lastMessage: 'Ваш вопрос решен',
-        time: '09:20',
-        unread: 0,
-        online: true,
-        verified: true
-      }
-    ])
-
-    setContacts([
-      {
-        id: 1,
-        name: 'Aleksey',
-        username: '@aleksey',
+        name: user.username || 'Aleksey',
+        username: '@' + (user.username?.toLowerCase() || 'aleksey'),
         avatar: '👨',
         online: true,
         lastSeen: 'только что',
-        phone: '+7 949 340-10-92',
+        phone: user.phone || '+7 949 340-10-92',
         verified: true
-      },
-      {
-        id: 2,
-        name: 'Maria Ivanova', 
-        username: '@maria',
-        avatar: '👩',
-        online: false,
-        lastSeen: '2 часа назад',
-        phone: '+7 912 345-67-89',
-        verified: false
-      },
-      {
-        id: 3,
-        name: 'Alexey Tech',
-        username: '@alexeytech',
-        avatar: '👨‍💻',
-        online: true,
-        lastSeen: 'онлайн',
-        phone: '+7 987 654-32-10',
-        verified: true
-      },
-      {
-        id: 4,
-        name: 'Anastasia',
-        username: '@nastya',
-        avatar: '👸',
-        online: false,
-        lastSeen: 'вчера',
-        phone: '+7 911 222-33-44',
-        verified: false
       }
-    ])
+    ]
 
-    // Тестовые сообщения
+    setContacts(userContacts)
+
+    // Чаты только с реальными контактами
+    const userChats = [
+      {
+        id: 1,
+        name: user.username || 'Aleksey',
+        username: '@' + (user.username?.toLowerCase() || 'aleksey'),
+        avatar: '👨',
+        lastMessage: 'Добро пожаловать в Quantum!',
+        time: 'только что',
+        unread: 0,
+        online: true,
+        verified: true,
+        userId: user.id
+      }
+    ]
+
+    setChats(userChats)
+
+    // Приветственное сообщение
     setMessages([
-      { id: 1, text: 'Привет! Как дела?', time: '12:25', isMe: false },
-      { id: 2, text: 'Привет! Все отлично, работаю над новым проектом', time: '12:26', isMe: true },
-      { id: 3, text: 'Круто! Что за проект?', time: '12:27', isMe: false },
-      { id: 4, text: 'Делаю клон Телеграма на Next.js', time: '12:28', isMe: true },
-      { id: 5, text: 'Ого! Покажешь когда будет готово?', time: '12:29', isMe: false },
+      { id: 1, text: 'Добро пожаловать в Quantum Messenger!', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), isMe: false, isSystem: true }
     ])
   }
 
@@ -140,6 +79,11 @@ export default function TelegramClone() {
       }
       setMessages(prev => [...prev, newMsg])
       setNewMessage('')
+      
+      // Сохраняем в localStorage
+      const chatKey = `quantum-chat-${activeChat.userId}`
+      const existingMessages = JSON.parse(localStorage.getItem(chatKey) || '[]')
+      localStorage.setItem(chatKey, JSON.stringify([...existingMessages, newMsg]))
       
       // Обновляем последнее сообщение в чате
       setChats(prev => prev.map(chat => 
@@ -160,30 +104,41 @@ export default function TelegramClone() {
       ...userData,
       id: Date.now(),
       avatar: '👤',
-      phone: userData.phone || '+7 XXX XXX-XX-XX'
+      phone: userData.phone || '+7 949 340-10-92',
+      username: userData.username || 'Aleksey'
     }
     setCurrentUser(newUser)
-    localStorage.setItem('tg-user', JSON.stringify(newUser))
-    loadData()
+    localStorage.setItem('quantum-user', JSON.stringify(newUser))
+    loadData(newUser)
   }
 
   const handleLogin = (userData: any) => {
-    setCurrentUser(userData)
-    localStorage.setItem('tg-user', JSON.stringify(userData))
-    loadData()
+    const user = {
+      ...userData,
+      id: Date.now(),
+      avatar: '👤',
+      phone: userData.phone || '+7 949 340-10-92',
+      username: userData.username || 'Aleksey'
+    }
+    setCurrentUser(user)
+    localStorage.setItem('quantum-user', JSON.stringify(user))
+    loadData(user)
   }
 
   const handleLogout = () => {
     setCurrentUser(null)
     setActiveChat(null)
-    localStorage.removeItem('tg-user')
+    setMessages([])
+    localStorage.removeItem('quantum-user')
   }
 
   const addContact = () => {
+    if (!searchQuery.trim()) return
+
     const newContact = {
       id: Date.now(),
-      name: searchQuery || `User${Math.floor(Math.random() * 1000)}`,
-      username: `@user${Date.now()}`,
+      name: searchQuery,
+      username: `@${searchQuery.toLowerCase().replace(/\s+/g, '')}`,
       avatar: '👤',
       online: true,
       lastSeen: 'только что',
@@ -191,33 +146,50 @@ export default function TelegramClone() {
       verified: false
     }
     setContacts(prev => [newContact, ...prev])
+    
+    // Создаем чат с новым контактом
+    const newChat = {
+      ...newContact,
+      lastMessage: 'Чат начат',
+      time: 'только что',
+      unread: 0,
+      userId: newContact.id
+    }
+    setChats(prev => [newChat, ...prev])
     setSearchQuery('')
   }
 
   const startNewChat = (contact: any) => {
-    const existingChat = chats.find(chat => chat.id === contact.id)
+    const existingChat = chats.find(chat => chat.userId === contact.id)
     if (existingChat) {
       setActiveChat(existingChat)
+      // Загружаем сообщения из localStorage
+      const chatKey = `quantum-chat-${contact.id}`
+      const savedMessages = JSON.parse(localStorage.getItem(chatKey) || '[]')
+      setMessages(savedMessages.length > 0 ? savedMessages : [
+        { id: 1, text: 'Чат начат', time: 'только что', isMe: false, isSystem: true }
+      ])
     } else {
       const newChat = {
         ...contact,
         lastMessage: 'Чат начат',
         time: 'только что',
-        unread: 0
+        unread: 0,
+        userId: contact.id
       }
       setChats(prev => [newChat, ...prev])
       setActiveChat(newChat)
+      setMessages([
+        { id: 1, text: 'Чат начат', time: 'только что', isMe: false, isSystem: true }
+      ])
     }
-    setMessages([
-      { id: 1, text: 'Чат начат', time: 'только что', isMe: false, isSystem: true }
-    ])
   }
 
   // КОМПОНЕНТ ГЛАВНОЙ СТРАНИЦЫ
   if (!currentUser) {
     return (
       <div style={{
-        background: 'linear-gradient(135deg, #3390ec, #5279ab)',
+        background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
         minHeight: '100vh',
         color: 'white',
         fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif',
@@ -227,7 +199,7 @@ export default function TelegramClone() {
         justifyContent: 'center',
         padding: '20px'
       }}>
-        {/* Логотип как в ТГ */}
+        {/* Логотип Quantum */}
         <div style={{
           width: '120px',
           height: '120px',
@@ -239,26 +211,34 @@ export default function TelegramClone() {
           marginBottom: '40px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
         }}>
-          <div style={{ fontSize: '60px' }}>✈️</div>
+          <div style={{ 
+            fontSize: '48px',
+            background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>Q</div>
         </div>
 
         <h1 style={{
-          fontSize: '32px',
+          fontSize: '42px',
           fontWeight: 'bold',
           marginBottom: '10px',
-          textAlign: 'center'
+          textAlign: 'center',
+          background: 'linear-gradient(45deg, #fff, #e0e0e0)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
         }}>
-          Telegram
+          Quantum
         </h1>
 
         <p style={{
-          fontSize: '16px',
+          fontSize: '18px',
           opacity: 0.9,
           marginBottom: '50px',
           textAlign: 'center',
           maxWidth: '300px'
         }}>
-          Быстрые и безопасные сообщения
+          Будущее коммуникаций уже здесь
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%', maxWidth: '300px' }}>
@@ -283,7 +263,7 @@ export default function TelegramClone() {
             style={{
               padding: '15px',
               background: 'white',
-              color: '#3390ec',
+              color: '#8b5cf6',
               border: 'none',
               borderRadius: '10px',
               fontSize: '16px',
@@ -303,8 +283,8 @@ export default function TelegramClone() {
           fontSize: '14px',
           opacity: 0.7
         }}>
-          <div>Самая быстрая коммуникация</div>
-          <div style={{ marginTop: '5px' }}>Безопасно • Надежно • Бесплатно</div>
+          <div>Следующее поколение мессенджера</div>
+          <div style={{ marginTop: '5px' }}>Безопасно • Быстро • Современно</div>
         </div>
 
         {/* Модалка входа */}
@@ -329,7 +309,7 @@ export default function TelegramClone() {
               maxWidth: '400px',
               color: 'black'
             }}>
-              <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>Вход в Telegram</h2>
+              <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>Вход в Quantum</h2>
               <div style={{ marginBottom: '15px' }}>
                 <input 
                   type="text" 
@@ -357,11 +337,16 @@ export default function TelegramClone() {
                 />
               </div>
               <button 
-                onClick={() => handleLogin({ username: 'User', phone: '+7 XXX XXX-XX-XX' })}
+                onClick={() => handleLogin({ 
+                  username: 'Aleksey', 
+                  phone: '+7 949 340-10-92',
+                  firstName: 'Aleksey',
+                  lastName: 'Quantum'
+                })}
                 style={{
                   width: '100%',
                   padding: '12px',
-                  background: '#3390ec',
+                  background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -411,7 +396,7 @@ export default function TelegramClone() {
               maxWidth: '400px',
               color: 'black'
             }}>
-              <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>Регистрация в Telegram</h2>
+              <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>Регистрация в Quantum</h2>
               <div style={{ marginBottom: '15px' }}>
                 <input 
                   type="text" 
@@ -442,6 +427,7 @@ export default function TelegramClone() {
                 <input 
                   type="tel" 
                   placeholder="Телефон"
+                  defaultValue="+7 949 340-10-92"
                   style={{
                     width: '100%',
                     padding: '12px',
@@ -453,15 +439,15 @@ export default function TelegramClone() {
               </div>
               <button 
                 onClick={() => handleRegister({ 
-                  username: 'New User', 
-                  phone: '+7 XXX XXX-XX-XX',
-                  firstName: 'User',
-                  lastName: 'New'
+                  username: 'Aleksey', 
+                  phone: '+7 949 340-10-92',
+                  firstName: 'Aleksey',
+                  lastName: 'Quantum'
                 })}
                 style={{
                   width: '100%',
                   padding: '12px',
-                  background: '#3390ec',
+                  background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
@@ -492,7 +478,7 @@ export default function TelegramClone() {
     )
   }
 
-  // ИНТЕРФЕЙС МЕССЕНДЖЕРА (КАК В ТГ)
+  // ИНТЕРФЕЙС МЕССЕНДЖЕРА QUANTUM
   return (
     <div style={{
       display: 'flex',
@@ -514,7 +500,16 @@ export default function TelegramClone() {
           background: '#f8f9fa'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>Telegram</h2>
+            <h2 style={{ 
+              margin: 0, 
+              fontSize: '20px', 
+              fontWeight: 'bold',
+              background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              Quantum
+            </h2>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer' }}>🔍</button>
               <button style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer' }}>⋮</button>
@@ -538,7 +533,7 @@ export default function TelegramClone() {
           />
         </div>
 
-        {/* Табы как в ТГ */}
+        {/* Табы */}
         <div style={{
           display: 'flex',
           borderBottom: '1px solid #e0e0e0',
@@ -551,9 +546,10 @@ export default function TelegramClone() {
               padding: '12px',
               background: currentSection === 'chats' ? 'white' : 'transparent',
               border: 'none',
-              borderBottom: currentSection === 'chats' ? '2px solid #3390ec' : 'none',
+              borderBottom: currentSection === 'chats' ? '2px solid #8b5cf6' : 'none',
               cursor: 'pointer',
-              fontWeight: currentSection === 'chats' ? 'bold' : 'normal'
+              fontWeight: currentSection === 'chats' ? 'bold' : 'normal',
+              color: currentSection === 'chats' ? '#8b5cf6' : '#666'
             }}
           >
             Чаты
@@ -565,9 +561,10 @@ export default function TelegramClone() {
               padding: '12px',
               background: currentSection === 'contacts' ? 'white' : 'transparent',
               border: 'none',
-              borderBottom: currentSection === 'contacts' ? '2px solid #3390ec' : 'none',
+              borderBottom: currentSection === 'contacts' ? '2px solid #8b5cf6' : 'none',
               cursor: 'pointer',
-              fontWeight: currentSection === 'contacts' ? 'bold' : 'normal'
+              fontWeight: currentSection === 'contacts' ? 'bold' : 'normal',
+              color: currentSection === 'contacts' ? '#8b5cf6' : '#666'
             }}
           >
             Контакты
@@ -579,9 +576,10 @@ export default function TelegramClone() {
               padding: '12px',
               background: currentSection === 'settings' ? 'white' : 'transparent',
               border: 'none',
-              borderBottom: currentSection === 'settings' ? '2px solid #3390ec' : 'none',
+              borderBottom: currentSection === 'settings' ? '2px solid #8b5cf6' : 'none',
               cursor: 'pointer',
-              fontWeight: currentSection === 'settings' ? 'bold' : 'normal'
+              fontWeight: currentSection === 'settings' ? 'bold' : 'normal',
+              color: currentSection === 'settings' ? '#8b5cf6' : '#666'
             }}
           >
             Настройки
@@ -595,21 +593,29 @@ export default function TelegramClone() {
               {chats.map(chat => (
                 <div 
                   key={chat.id}
-                  onClick={() => setActiveChat(chat)}
+                  onClick={() => {
+                    setActiveChat(chat)
+                    // Загружаем сообщения для этого чата
+                    const chatKey = `quantum-chat-${chat.userId}`
+                    const savedMessages = JSON.parse(localStorage.getItem(chatKey) || '[]')
+                    setMessages(savedMessages.length > 0 ? savedMessages : [
+                      { id: 1, text: 'Чат начат', time: 'только что', isMe: false, isSystem: true }
+                    ])
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     padding: '12px 15px',
                     borderBottom: '1px solid #f0f0f0',
                     cursor: 'pointer',
-                    background: activeChat?.id === chat.id ? '#e3f2fd' : 'white'
+                    background: activeChat?.id === chat.id ? '#f3e8ff' : 'white'
                   }}
                 >
                   <div style={{
                     width: '50px',
                     height: '50px',
                     borderRadius: '50%',
-                    background: '#e9ecef',
+                    background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -625,7 +631,7 @@ export default function TelegramClone() {
                         right: '2px',
                         width: '12px',
                         height: '12px',
-                        background: '#4caf50',
+                        background: '#10b981',
                         border: '2px solid white',
                         borderRadius: '50%'
                       }}></div>
@@ -636,7 +642,7 @@ export default function TelegramClone() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ fontWeight: 'bold', fontSize: '15px' }}>
                         {chat.name}
-                        {chat.verified && <span style={{ marginLeft: '5px', color: '#3390ec' }}>✓</span>}
+                        {chat.verified && <span style={{ marginLeft: '5px', color: '#8b5cf6' }}>✓</span>}
                       </div>
                       <div style={{ fontSize: '12px', color: '#666' }}>{chat.time}</div>
                     </div>
@@ -644,7 +650,7 @@ export default function TelegramClone() {
                       <span>{chat.lastMessage}</span>
                       {chat.unread > 0 && (
                         <span style={{
-                          background: '#3390ec',
+                          background: '#8b5cf6',
                           color: 'white',
                           borderRadius: '10px',
                           padding: '2px 6px',
@@ -665,20 +671,34 @@ export default function TelegramClone() {
           {currentSection === 'contacts' && (
             <div>
               <div style={{ padding: '15px', background: '#f8f9fa' }}>
-                <button 
-                  onClick={addContact}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    background: '#3390ec',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  + Добавить контакт
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input 
+                    type="text"
+                    placeholder="Имя нового контакта"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  <button 
+                    onClick={addContact}
+                    style={{
+                      padding: '10px 15px',
+                      background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
               {contacts.map(contact => (
                 <div 
@@ -696,7 +716,7 @@ export default function TelegramClone() {
                     width: '50px',
                     height: '50px',
                     borderRadius: '50%',
-                    background: '#e9ecef',
+                    background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -712,7 +732,7 @@ export default function TelegramClone() {
                         right: '2px',
                         width: '12px',
                         height: '12px',
-                        background: '#4caf50',
+                        background: '#10b981',
                         border: '2px solid white',
                         borderRadius: '50%'
                       }}></div>
@@ -722,7 +742,7 @@ export default function TelegramClone() {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 'bold', fontSize: '15px' }}>
                       {contact.name}
-                      {contact.verified && <span style={{ marginLeft: '5px', color: '#3390ec' }}>✓</span>}
+                      {contact.verified && <span style={{ marginLeft: '5px', color: '#8b5cf6' }}>✓</span>}
                     </div>
                     <div style={{ fontSize: '13px', color: '#666' }}>
                       {contact.online ? 'онлайн' : `был(а) ${contact.lastSeen}`}
@@ -740,7 +760,7 @@ export default function TelegramClone() {
                   width: '70px',
                   height: '70px',
                   borderRadius: '50%',
-                  background: '#3390ec',
+                  background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -763,7 +783,9 @@ export default function TelegramClone() {
                   border: 'none',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  fontSize: '15px'
+                  fontSize: '15px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
                 }}>✏️ Редактировать профиль</button>
 
                 <button style={{
@@ -772,7 +794,9 @@ export default function TelegramClone() {
                   border: 'none',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  fontSize: '15px'
+                  fontSize: '15px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
                 }}>🔔 Уведомления</button>
 
                 <button style={{
@@ -781,7 +805,9 @@ export default function TelegramClone() {
                   border: 'none',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  fontSize: '15px'
+                  fontSize: '15px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
                 }}>🛡️ Конфиденциальность</button>
 
                 <button style={{
@@ -790,7 +816,9 @@ export default function TelegramClone() {
                   border: 'none',
                   textAlign: 'left',
                   cursor: 'pointer',
-                  fontSize: '15px'
+                  fontSize: '15px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
                 }}>💬 Чаты</button>
 
                 <button 
@@ -803,7 +831,9 @@ export default function TelegramClone() {
                     cursor: 'pointer',
                     fontSize: '15px',
                     color: '#f44336',
-                    marginTop: '20px'
+                    marginTop: '20px',
+                    borderRadius: '8px',
+                    border: '1px solid #ffcdd2'
                   }}
                 >
                   🚪 Выйти
@@ -832,7 +862,7 @@ export default function TelegramClone() {
                   width: '45px',
                   height: '45px',
                   borderRadius: '50%',
-                  background: '#e9ecef',
+                  background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -844,7 +874,7 @@ export default function TelegramClone() {
                 <div>
                   <div style={{ fontWeight: 'bold', fontSize: '16px' }}>
                     {activeChat.name}
-                    {activeChat.verified && <span style={{ marginLeft: '5px', color: '#3390ec' }}>✓</span>}
+                    {activeChat.verified && <span style={{ marginLeft: '5px', color: '#8b5cf6' }}>✓</span>}
                   </div>
                   <div style={{ fontSize: '13px', color: '#666' }}>
                     {activeChat.online ? 'онлайн' : 'был(а) недавно'}
@@ -863,8 +893,7 @@ export default function TelegramClone() {
               flex: 1,
               padding: '20px',
               overflowY: 'auto',
-              background: '#e5ddd5',
-              backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%239C92AC\' fill-opacity=\'0.05\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")'
+              background: 'linear-gradient(135deg, #f3e8ff, #fce7f3)'
             }}>
               {messages.map(msg => (
                 <div key={msg.id} style={{
@@ -875,9 +904,10 @@ export default function TelegramClone() {
                   <div style={{
                     maxWidth: '70%',
                     padding: '10px 15px',
-                    background: msg.isMe ? '#dcf8c6' : 'white',
-                    borderRadius: '15px',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                    background: msg.isMe ? 'linear-gradient(45deg, #8b5cf6, #ec4899)' : 'white',
+                    color: msg.isMe ? 'white' : 'black',
+                    borderRadius: '18px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     position: 'relative'
                   }}>
                     {msg.isSystem ? (
@@ -889,7 +919,7 @@ export default function TelegramClone() {
                         <div style={{ fontSize: '15px', marginBottom: '5px' }}>{msg.text}</div>
                         <div style={{ 
                           fontSize: '11px', 
-                          color: '#666', 
+                          color: msg.isMe ? 'rgba(255,255,255,0.8)' : '#666', 
                           textAlign: 'right',
                           marginTop: '2px'
                         }}>
@@ -910,8 +940,20 @@ export default function TelegramClone() {
               borderTop: '1px solid #e0e0e0'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>😊</button>
-                <button style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>📎</button>
+                <button style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  fontSize: '20px', 
+                  cursor: 'pointer',
+                  color: '#8b5cf6'
+                }}>😊</button>
+                <button style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  fontSize: '20px', 
+                  cursor: 'pointer',
+                  color: '#8b5cf6'
+                }}>📎</button>
                 <input
                   type="text"
                   value={newMessage}
@@ -922,16 +964,17 @@ export default function TelegramClone() {
                     flex: 1,
                     padding: '12px 15px',
                     border: '1px solid #e0e0e0',
-                    borderRadius: '20px',
+                    borderRadius: '25px',
                     fontSize: '15px',
-                    outline: 'none'
+                    outline: 'none',
+                    background: '#f8f9fa'
                   }}
                 />
                 <button 
                   onClick={sendMessage}
                   disabled={!newMessage.trim()}
                   style={{
-                    background: '#3390ec',
+                    background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '50%',
@@ -956,13 +999,19 @@ export default function TelegramClone() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: '#f8f9fa',
-            color: '#666',
-            fontSize: '16px'
+            background: 'linear-gradient(135deg, #f8f9fa, #ffffff)',
+            color: '#666'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '48px', marginBottom: '20px' }}>✈️</div>
-              <div>Выберите чат чтобы начать общение</div>
+              <div style={{ 
+                fontSize: '64px',
+                marginBottom: '20px',
+                background: 'linear-gradient(45deg, #8b5cf6, #ec4899)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>Q</div>
+              <div style={{ fontSize: '18px', marginBottom: '10px' }}>Добро пожаловать в Quantum</div>
+              <div style={{ fontSize: '14px', color: '#999' }}>Выберите чат чтобы начать общение</div>
             </div>
           </div>
         )}
